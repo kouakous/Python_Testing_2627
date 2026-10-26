@@ -111,3 +111,11 @@ def test_validate_booking_nombre_negatif():
 
 def test_parse_places_espace_seul():
     assert server.parse_places(" ") is None
+
+
+def test_validate_booking_competition_passee():
+    competition = make_competition(20, "2020-03-27 10:00:00")
+
+    resultat = server.validate_booking(make_club(10), competition, 3)
+
+    assert resultat == "This competition is already over."
