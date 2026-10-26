@@ -70,3 +70,14 @@ def test_purchase_competition_inconnue(client):
 
     assert response.status_code == 200
     assert b"Something went wrong-please try again" in response.data
+
+
+def test_purchase_refuse_si_points_insuffisants(client, clubs_test):
+    response = client.post("/purchasePlaces", data={
+        "competition": "Compet Future",
+        "club": "Club B",
+        "places": "5",
+    })
+
+    assert b"You do not have enough points." in response.data
+    assert int(clubs_test[1]["points"]) == 2
