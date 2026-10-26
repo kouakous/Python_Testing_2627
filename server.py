@@ -57,6 +57,10 @@ def record_booking(bookings, competition_name, club_name, places):
 def validate_booking(club, competition, places, already_booked=0):
     if already_booked + places > MAX_PLACES_PER_COMPETITION:
         return "You cannot book more than 12 places in a competition."
+    if int(competition["numberOfPlaces"]) <= 0:
+        return "This competition is full."
+    if places > int(competition["numberOfPlaces"]):
+        return "Not enough places available in this competition."
     if places > int(club["points"]):
         return "You do not have enough points."
     return None
