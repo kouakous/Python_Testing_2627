@@ -16,3 +16,10 @@ def test_competition_complete_affiche_un_message(client):
     response = client.post("/showSummary", data={"email": "a@club.com"})
 
     assert b"Competition full" in response.data
+
+
+def test_logout_renvoie_vers_l_accueil(client):
+    response = client.get("/logout")
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/")
