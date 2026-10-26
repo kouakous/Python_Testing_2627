@@ -76,6 +76,10 @@ def validate_booking(club, competition, places, already_booked=0):
     return None
 
 
+def get_points_board(clubs):
+    return sorted(clubs, key=lambda club: club["name"])
+
+
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
@@ -149,7 +153,9 @@ def purchasePlaces():
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
-# TODO: Add route for points display
+@app.route('/points')
+def points():
+    return render_template('points.html', clubs=get_points_board(clubs))
 
 
 @app.route('/logout')
