@@ -19,6 +19,10 @@ def competitions_test():
          "numberOfPlaces": "20"},
         {"name": "Compet Passee", "date": "2020-03-27 10:00:00",
          "numberOfPlaces": "25"},
+        {"name": "Compet Petite", "date": "2030-06-01 10:00:00",
+         "numberOfPlaces": "5"},
+        {"name": "Compet Complete", "date": "2030-06-01 10:00:00",
+         "numberOfPlaces": "0"},
     ]
 
 

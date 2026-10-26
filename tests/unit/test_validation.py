@@ -69,3 +69,21 @@ def test_validate_booking_cumul_exactement_12_places():
                                        already_booked=10)
 
     assert resultat is None
+
+
+def test_validate_booking_competition_complete():
+    resultat = server.validate_booking(make_club(10), make_competition(0), 1)
+
+    assert resultat == "This competition is full."
+
+
+def test_validate_booking_places_insuffisantes():
+    resultat = server.validate_booking(make_club(10), make_competition(2), 3)
+
+    assert resultat == "Not enough places available in this competition."
+
+
+def test_validate_booking_prend_exactement_les_places_restantes():
+    resultat = server.validate_booking(make_club(10), make_competition(3), 3)
+
+    assert resultat is None
