@@ -65,3 +65,15 @@ def test_nom_club_inconnu_renvoie_none():
     resultat = server.get_club_by_name("Club C", clubs)
 
     assert resultat is None
+
+
+def test_email_liste_vide_renvoie_none():
+    assert server.get_club_by_email("a@club.com", []) is None
+
+
+def test_nom_club_liste_vide_renvoie_none():
+    assert server.get_club_by_name("Club A", []) is None
+
+
+def test_nom_competition_liste_vide_renvoie_none():
+    assert server.get_competition_by_name("Compet Future", []) is None

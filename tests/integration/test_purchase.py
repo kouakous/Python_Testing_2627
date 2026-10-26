@@ -48,3 +48,25 @@ def test_purchase_message_indique_le_nombre_de_places(client):
     })
 
     assert b"3 places booked" in response.data
+
+
+def test_purchase_club_inconnu(client):
+    response = client.post("/purchasePlaces", data={
+        "competition": "Compet Future",
+        "club": "Club Inconnu",
+        "places": "3",
+    })
+
+    assert response.status_code == 200
+    assert b"Something went wrong-please try again" in response.data
+
+
+def test_purchase_competition_inconnue(client):
+    response = client.post("/purchasePlaces", data={
+        "competition": "Compet Inconnue",
+        "club": "Club A",
+        "places": "3",
+    })
+
+    assert response.status_code == 200
+    assert b"Something went wrong-please try again" in response.data
