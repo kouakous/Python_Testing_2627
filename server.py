@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from flask import Flask,render_template,request,redirect,flash,url_for
 
 
@@ -45,6 +46,11 @@ def parse_places(value):
 MAX_PLACES_PER_COMPETITION = 12
 
 
+def is_past(competition):
+    date = datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
+    return date < datetime.now()
+
+
 def get_booked_places(bookings, competition_name, club_name):
     return bookings.get((competition_name, club_name), 0)
 
@@ -55,6 +61,8 @@ def record_booking(bookings, competition_name, club_name, places):
 
 
 def validate_booking(club, competition, places, already_booked=0):
+    if is_past(competition):
+        return "This competition is already over."
     if places <= 0:
         return "Please enter a positive number of places."
     if already_booked + places > MAX_PLACES_PER_COMPETITION:
@@ -98,6 +106,10 @@ def book(competition, club):
         return render_template('index.html')
     if foundCompetition is None:
         flash("Something went wrong-please try again")
+        return render_template('welcome.html', club=foundClub,
+                               competitions=competitions)
+    if is_past(foundCompetition):
+        flash("This competition is already over.")
         return render_template('welcome.html', club=foundClub,
                                competitions=competitions)
     return render_template('booking.html', club=foundClub,
