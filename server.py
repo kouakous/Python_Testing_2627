@@ -42,6 +42,12 @@ def parse_places(value):
         return None
 
 
+def validate_booking(club, competition, places):
+    if places > int(club["points"]):
+        return "You do not have enough points."
+    return None
+
+
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
@@ -92,6 +98,11 @@ def purchasePlaces():
     placesRequired = parse_places(request.form['places'])
     if placesRequired is None:
         flash("Please enter a valid number of places.")
+        return render_template('booking.html', club=club,
+                               competition=competition)
+    error = validate_booking(club, competition, placesRequired)
+    if error is not None:
+        flash(error)
         return render_template('booking.html', club=club,
                                competition=competition)
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
