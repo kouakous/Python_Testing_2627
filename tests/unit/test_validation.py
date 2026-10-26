@@ -43,3 +43,29 @@ def test_validate_booking_une_seule_place():
     resultat = server.validate_booking(make_club(1), make_competition(20), 1)
 
     assert resultat is None
+
+
+def test_validate_booking_plus_de_12_places():
+    resultat = server.validate_booking(make_club(30), make_competition(20), 13)
+
+    assert resultat == "You cannot book more than 12 places in a competition."
+
+
+def test_validate_booking_exactement_12_places():
+    resultat = server.validate_booking(make_club(30), make_competition(20), 12)
+
+    assert resultat is None
+
+
+def test_validate_booking_cumul_au_dela_de_12_places():
+    resultat = server.validate_booking(make_club(30), make_competition(20), 3,
+                                       already_booked=10)
+
+    assert resultat == "You cannot book more than 12 places in a competition."
+
+
+def test_validate_booking_cumul_exactement_12_places():
+    resultat = server.validate_booking(make_club(30), make_competition(20), 2,
+                                       already_booked=10)
+
+    assert resultat is None

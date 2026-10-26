@@ -81,3 +81,14 @@ def test_purchase_refuse_si_points_insuffisants(client, clubs_test):
 
     assert b"You do not have enough points." in response.data
     assert int(clubs_test[1]["points"]) == 2
+
+
+def test_purchase_refuse_plus_de_12_places_en_plusieurs_fois(client,
+                                                             clubs_test):
+    donnees = {"competition": "Compet Future", "club": "Club Riche"}
+    client.post("/purchasePlaces", data={**donnees, "places": "10"})
+
+    response = client.post("/purchasePlaces", data={**donnees, "places": "3"})
+
+    assert b"more than 12 places" in response.data
+    assert int(clubs_test[2]["points"]) == 20
