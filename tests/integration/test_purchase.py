@@ -103,3 +103,14 @@ def test_purchase_refuse_si_places_insuffisantes(client, competitions_test):
 
     assert b"Not enough places available" in response.data
     assert int(competitions_test[2]["numberOfPlaces"]) == 5
+
+
+def test_purchase_refuse_un_nombre_negatif(client, clubs_test):
+    response = client.post("/purchasePlaces", data={
+        "competition": "Compet Future",
+        "club": "Club A",
+        "places": "-5",
+    })
+
+    assert b"Please enter a positive number of places." in response.data
+    assert int(clubs_test[0]["points"]) == 10

@@ -87,3 +87,27 @@ def test_validate_booking_prend_exactement_les_places_restantes():
     resultat = server.validate_booking(make_club(10), make_competition(3), 3)
 
     assert resultat is None
+
+
+def test_parse_places_accepte_un_nombre_negatif():
+    assert server.parse_places("-5") == -5
+
+
+def test_parse_places_ignore_les_espaces():
+    assert server.parse_places(" 3 ") == 3
+
+
+def test_validate_booking_zero_place():
+    resultat = server.validate_booking(make_club(10), make_competition(20), 0)
+
+    assert resultat == "Please enter a positive number of places."
+
+
+def test_validate_booking_nombre_negatif():
+    resultat = server.validate_booking(make_club(10), make_competition(20), -5)
+
+    assert resultat == "Please enter a positive number of places."
+
+
+def test_parse_places_espace_seul():
+    assert server.parse_places(" ") is None
