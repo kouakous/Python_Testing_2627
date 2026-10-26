@@ -42,7 +42,21 @@ def parse_places(value):
         return None
 
 
-def validate_booking(club, competition, places):
+MAX_PLACES_PER_COMPETITION = 12
+
+
+def get_booked_places(bookings, competition_name, club_name):
+    return bookings.get((competition_name, club_name), 0)
+
+
+def record_booking(bookings, competition_name, club_name, places):
+    key = (competition_name, club_name)
+    bookings[key] = bookings.get(key, 0) + places
+
+
+def validate_booking(club, competition, places, already_booked=0):
+    if already_booked + places > MAX_PLACES_PER_COMPETITION:
+        return "You cannot book more than 12 places in a competition."
     if places > int(club["points"]):
         return "You do not have enough points."
     return None
@@ -53,6 +67,7 @@ app.secret_key = 'something_special'
 
 competitions = loadCompetitions()
 clubs = loadClubs()
+bookings = {}
 
 @app.route('/')
 def index():
@@ -100,13 +115,18 @@ def purchasePlaces():
         flash("Please enter a valid number of places.")
         return render_template('booking.html', club=club,
                                competition=competition)
-    error = validate_booking(club, competition, placesRequired)
+    already_booked = get_booked_places(bookings, competition['name'],
+                                       club['name'])
+    error = validate_booking(club, competition, placesRequired,
+                             already_booked)
     if error is not None:
         flash(error)
         return render_template('booking.html', club=club,
                                competition=competition)
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     club['points'] = int(club['points']) - placesRequired
+    record_booking(bookings, competition['name'], club['name'],
+                   placesRequired)
     flash(f"Great-booking complete! {placesRequired} places booked.")
     return render_template('welcome.html', club=club, competitions=competitions)
 
