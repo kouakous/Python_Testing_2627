@@ -35,6 +35,13 @@ def get_competition_by_name(name, competitions):
     return None
 
 
+def parse_places(value):
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
@@ -74,7 +81,11 @@ def book(competition, club):
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
+    placesRequired = parse_places(request.form['places'])
+    if placesRequired is None:
+        flash("Please enter a valid number of places.")
+        return render_template('booking.html', club=club,
+                               competition=competition)
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
