@@ -1,4 +1,7 @@
-# Intro
+# GUDLFT – Plateforme de réservation (POC)
+
+## Intro
+
 ```
 Hey,
 
@@ -26,56 +29,174 @@ nous examinerons votre code et nous testerons la couverture de la nouvelle fonct
 Merci !
 
 ```
-1. Why
 
+## 1. Pourquoi
 
-    This is a proof of concept (POC) project to show a light-weight version of our competition booking platform. The aim is the keep things as light as possible, and use feedback from the users to iterate.
+Ce projet est une preuve de concept (POC) d'une version allégée de la plateforme de réservation de compétitions. Les secrétaires des clubs se connectent avec leur email et utilisent les points de leur club pour réserver des places : **1 point = 1 place**, avec **12 places au maximum par club et par compétition**.
 
-2. Getting Started
+## 2. Technologies
 
-    This project uses the following technologies:
+- Python **3.10 ou plus** : testé sous Windows (Python 3.11) et sous Linux (Python 3.10 et 3.13). macOS utilise les mêmes commandes que Linux, mais le projet n'y a pas été testé.
+- [Flask 3.1](https://flask.palletsprojects.com/) : le framework web
+- [pytest](https://docs.pytest.org/) et [coverage](https://coverage.readthedocs.io/) : les tests et la couverture de code
+- [Selenium](https://www.selenium.dev/documentation/) : les tests fonctionnels (Google Chrome requis)
+- [Locust](https://docs.locust.io/) : les tests de performance
+- [Flake8](https://flake8.pycqa.org/) et [flake8-html](https://pypi.org/project/flake8-html/) : la qualité du code (PEP 8)
 
-    * Python v3.x+
+## 3. Installation
 
-    * [Flask](https://flask.palletsprojects.com/en/1.1.x/)
+```bash
+git clone https://github.com/kouakous/Python_Testing_2627.git
+cd Python_Testing_2627
+```
 
-        Whereas Django does a lot of things for us out of the box, Flask allows us to add only what we need. 
-     
+| Étape | Windows (PowerShell) | macOS / Linux |
+|---|---|---|
+| Créer l'environnement virtuel | `python -m venv venv` | `python3 -m venv venv` |
+| L'activer | `venv\Scripts\Activate.ps1` | `source venv/bin/activate` |
+| Installer les dépendances | `pip install -r requirements.txt` | `pip install -r requirements.txt` |
 
-    * [Virtual environment](https://virtualenv.pypa.io/en/stable/installation.html)
+- **Windows** : si PowerShell refuse d'activer l'environnement, lancez d'abord `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned`.
+- `requirements.txt` ne contient que les dépendances directes, avec leur version. pip installe automatiquement les sous-dépendances adaptées à chaque système.
 
-        This ensures you'll be able to install the correct packages without interfering with Python on your machine.
+## 4. Lancer l'application
 
-        Before you begin, please ensure you have this installed globally. 
+Sur tous les systèmes :
 
+```bash
+python server.py
+```
 
-3. Installation
+Ouvrez ensuite http://127.0.0.1:5000.
 
-    - After cloning, change into the directory and type <code>virtualenv .</code>. This will then set up a a virtual python environment within that directory.
+Vous pouvez aussi utiliser la commande Flask :
 
-    - Next, type <code>source bin/activate</code>. You should see that your command prompt has changed to the name of the folder. This means that you can install packages in here without affecting affecting files outside. To deactivate, type <code>deactivate</code>
+- **Windows** : `$env:FLASK_APP = "server.py"`, puis `flask run`
+- **macOS / Linux** : `export FLASK_APP=server.py`, puis `flask run`
 
-    - Rather than hunting around for the packages you need, you can install in one step. Type <code>pip install -r requirements.txt</code>. This will install all the packages listed in the respective file. If you install a package, make sure others know by updating the requirements.txt file. An easy way to do this is <code>pip freeze > requirements.txt</code>
+**macOS 12 et plus** : le port 5000 est occupé par le récepteur AirPlay. Utilisez `flask run --port 5001`, ou désactivez le récepteur AirPlay dans les réglages du système.
 
-    - Flask requires that you set an environmental variable to the python file. However you do that, you'll want to set the file to be <code>server.py</code>. Check [here](https://flask.palletsprojects.com/en/1.1.x/quickstart/#a-minimal-application) for more details
+Les emails acceptés à la connexion sont dans `clubs.json` : `john@simplylift.co`, `admin@irontemple.com`, `kate@shelifts.co.uk`.
 
-    - You should now be ready to test the application. In the directory, type either <code>flask run</code> or <code>python -m flask run</code>. The app should respond with an address you should be able to go to using your browser.
+## 5. Données
 
-4. Current Setup
+- `clubs.json` et `competitions.json` remplacent une base de données.
+- Les réservations sont gardées **en mémoire** : elles sont perdues au redémarrage du serveur. C'est volontaire pour ce POC.
+- La compétition **Winter Cup** (décembre 2027) a été ajoutée. Les deux compétitions d'origine datent de 2020 et ne sont donc plus réservables.
 
-    The app is powered by [JSON files](https://www.tutorialspoint.com/json/json_quick_guide.htm). This is to get around having a DB until we actually need one. The main ones are:
-     
-    * competitions.json - list of competitions
-    * clubs.json - list of clubs with relevant information. You can look here to see what email addresses the app will accept for login.
+## 6. Tests
 
-5. Testing
+```
+tests/
+├── conftest.py             fixtures communes : données de test et client Flask
+├── unit/                   44 tests : fonctions isolées
+│   ├── test_recherche.py       recherche d'un club ou d'une compétition
+│   ├── test_validation.py      saisie du nombre de places et règles de réservation
+│   ├── test_reservations.py    suivi des places déjà réservées par club
+│   ├── test_dates.py           compétitions passées
+│   ├── test_tableau_points.py  tableau des points
+│   └── test_chargement.py      chargement des fichiers JSON
+├── integration/            22 tests : routes Flask avec le client de test
+│   ├── test_login.py           connexion, déconnexion, compétition complète
+│   ├── test_book.py            page de réservation
+│   ├── test_purchase.py        achat de places
+│   └── test_points.py          tableau public des points
+└── functional/             2 tests : parcours utilisateur dans Chrome (Selenium)
+    ├── conftest.py             serveur Flask réel et navigateur
+    └── test_parcours.py
+```
 
-    You are free to use whatever testing framework you like-the main thing is that you can show what tests you are using.
+```bash
+python -m pytest                 # tous les tests (68)
+python -m pytest tests/unit      # un seul type de tests
+```
 
-    We also like to show how well we're testing, so there's a module called 
-    [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
-   
- 6. Flake8 Report 
-    
+- Les tests utilisent leurs **propres données** (`tests/conftest.py`), jamais les fichiers JSON. `monkeypatch` les remet en place après chaque test, donc un test ne peut pas influencer le suivant.
+- Les tests fonctionnels lancent un vrai serveur Flask sur un port libre et pilotent Chrome sans fenêtre. Si Chrome n'est pas installé, ils sont **ignorés** au lieu d'échouer.
+- Le ratio demandé est respecté : **44 tests unitaires**, pour 22 tests d'intégration et 2 tests fonctionnels.
+- Approche **TDD** : dans chaque branche de bug, un premier commit ajoute les tests (rouges), un second ajoute la correction (verts).
 
+## 7. Couverture de code
 
+```bash
+coverage run -m pytest
+coverage report
+coverage html -d reports/coverage
+```
+
+**Résultat : 99 % de `server.py`** (121 instructions, 1 non couverte : la ligne `app.run()`, exécutée seulement avec `python server.py`). L'objectif du guide est de 60 %.
+
+Rapport détaillé : `reports/coverage/index.html`.
+
+## 8. Tests de performance (Locust)
+
+Exigences : afficher la liste des compétitions en moins de **5 secondes** et mettre à jour les points en moins de **2 secondes**, avec **6 utilisateurs**.
+
+Dans un premier terminal :
+
+```bash
+python server.py
+```
+
+Dans un second terminal, avec l'environnement virtuel activé :
+
+```bash
+locust -f locustfile.py --headless -u 6 -r 6 -t 60s --host http://127.0.0.1:5000 --html reports/performance.html
+```
+
+Résultats (6 utilisateurs, 60 secondes, en local) :
+
+| Requête | Requêtes | Échecs | Moyenne | 95 % | Maximum | Exigence |
+|---|---|---|---|---|---|---|
+| `POST /showSummary` (liste des compétitions) | 109 | 0 | 5 ms | 7 ms | 64 ms | < 5 s ✅ |
+| `POST /purchasePlaces` (mise à jour des points) | 36 | 0 | 6 ms | 18 ms | 61 ms | < 2 s ✅ |
+| `GET /points` (tableau des points) | 36 | 0 | 6 ms | 47 ms | 57 ms | — |
+| **Total** | **181** | **0** | **6 ms** | **7 ms** | **64 ms** | ✅ |
+
+Rapport complet : `reports/performance.html`.
+
+## 9. Rapport Flake8
+
+```bash
+python -m flake8
+python -m flake8 --format=html --htmldir=reports/flake8
+```
+
+- La première commande n'affiche rien : **aucune erreur**.
+- Le rapport HTML (`reports/flake8/index.html`) indique : *No flake8 errors found in 15 files scanned.*
+- La configuration est dans `.flake8` : 79 caractères maximum, `venv/` et `reports/` exclus.
+
+## 10. Conventions
+
+- **Branches** : `bug/<nom>`, `feature/<nom>` et `amelioration/<nom>`, sans accents pour éviter les problèmes de noms de fichiers sous macOS.
+- **Une branche par bug.** Une branche n'est fusionnée dans `main` que si tous les tests passent.
+- **Branche `QA`** : créée depuis `main` pour la revue, et jamais fusionnée dans `main`.
+- **Tests** : un fichier `test_<sujet>.py` par partie du code, et des fonctions nommées `test_<situation>_<resultat_attendu>`.
+- **Code** : PEP 8, vérifié par Flake8.
+
+## 11. Bugs corrigés et fonctionnalités ajoutées
+
+| Problème | Branche |
+|---|---|
+| Connexion avec un email inconnu : l'application plantait | `bug/email-inconnu` |
+| `/book` avec un club ou une compétition inexistants : plantage, et club transmis sous forme de texte | `bug/book-url-invalide` |
+| Nombre de places vide ou non numérique : plantage | `bug/places-invalides` |
+| Points non déduits après une réservation ; message sans le nombre de places | `bug/deduction-points` |
+| `/purchasePlaces` avec un club ou une compétition inconnus : plantage | `bug/purchase-club-competition-inconnus` |
+| Réservation acceptée sans assez de points | `bug/points-insuffisants` |
+| Plus de 12 places par compétition, y compris en plusieurs fois | `bug/max-12-places` |
+| Plus de places que disponibles ; aucun message pour une compétition complète | `bug/places-disponibles` |
+| Zéro ou nombre négatif de places accepté | `bug/places-negatives` |
+| Réservation possible sur une compétition passée | `bug/competition-passee` |
+| Phase 2 : tableau public des points des clubs | `feature/tableau-points` |
+| Compatibilité Windows, macOS et Linux ; passage à Flask 3 | `amelioration/multiplateforme` |
+| Tests fonctionnels Selenium | `amelioration/tests-fonctionnels` |
+| Tests de performance Locust | `amelioration/tests-performance` |
+| Style PEP 8, rapports Flake8 et de couverture, README | `amelioration/flake8-et-readme` |
+
+## 12. Limites connues et pistes d'amélioration
+
+- **Pas de vraie session** : une page comme `/book/<compétition>/<club>` est accessible sans connexion, et `/logout` ne fait que rediriger. Piste : gérer la connexion avec `flask.session` ou Flask-Login.
+- **Données non persistées** : les JSON ne sont jamais réécrits. Piste : une base de données (SQLite, PostgreSQL).
+- **`secret_key` écrite en dur** dans le code. Piste : la lire dans une variable d'environnement.
+- **Tout le code est dans `server.py`**, un choix assumé pour un POC. Piste : séparer les données, les règles de réservation et les routes (Blueprints Flask, fonction `create_app()`).

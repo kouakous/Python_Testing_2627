@@ -1,7 +1,7 @@
 import json
 import os
 from datetime import datetime
-from flask import Flask,render_template,request,redirect,flash,url_for
+from flask import Flask, flash, redirect, render_template, request, url_for
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -9,15 +9,15 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 def loadClubs():
     path = os.path.join(BASE_DIR, 'clubs.json')
     with open(path, encoding='utf-8') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
+        listOfClubs = json.load(c)['clubs']
+        return listOfClubs
 
 
 def loadCompetitions():
     path = os.path.join(BASE_DIR, 'competitions.json')
     with open(path, encoding='utf-8') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+        listOfCompetitions = json.load(comps)['competitions']
+        return listOfCompetitions
 
 
 def get_club_by_email(email, clubs):
@@ -92,6 +92,7 @@ competitions = loadCompetitions()
 clubs = loadClubs()
 bookings = {}
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -103,7 +104,8 @@ def showSummary():
     if club is None:
         flash("Sorry, this email is not registered.")
         return render_template('index.html')
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_template('welcome.html', club=club,
+                           competitions=competitions)
 
 
 @app.route('/book/<competition>/<club>')
@@ -150,12 +152,14 @@ def purchasePlaces():
         flash(error)
         return render_template('booking.html', club=club,
                                competition=competition)
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+    competition['numberOfPlaces'] = (int(competition['numberOfPlaces'])
+                                     - placesRequired)
     club['points'] = int(club['points']) - placesRequired
     record_booking(bookings, competition['name'], club['name'],
                    placesRequired)
     flash(f"Great-booking complete! {placesRequired} places booked.")
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_template('welcome.html', club=club,
+                           competitions=competitions)
 
 
 @app.route('/points')
